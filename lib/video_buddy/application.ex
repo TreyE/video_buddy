@@ -10,15 +10,13 @@ defmodule VideoBuddy.Application do
     children = [
       # Start the Ecto repository
       supervisor(VideoBuddy.Repo, []),
-      # Start the endpoint when the application starts
-      supervisor(VideoBuddyWeb.Endpoint, []),
-      # Start your own worker by calling: VideoBuddy.Worker.start_link(arg1, arg2, arg3)
-      # worker(VideoBuddy.Worker, [arg1, arg2, arg3]),
+      # Start the dependents of the repository
+      supervisor(VideoBuddy.RepositoryDependents, [])
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: VideoBuddy.Supervisor]
+    opts = [strategy: :one_for_all, name: VideoBuddy.Supervisor]
     Supervisor.start_link(children, opts)
   end
 
