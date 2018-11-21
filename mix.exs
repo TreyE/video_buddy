@@ -20,7 +20,7 @@ defmodule VideoBuddy.Mixfile do
   def application do
     [
       mod: {VideoBuddy.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :tesla, :hackney]
     ]
   end
 
@@ -40,7 +40,10 @@ defmodule VideoBuddy.Mixfile do
       {:phoenix_html, "~> 2.10"},
       {:phoenix_live_reload, "~> 1.0", only: :dev},
       {:gettext, "~> 0.11"},
-      {:cowboy, "~> 1.0"}
+      {:cowboy, "~> 1.0"},
+      {:plug_cowboy, "~> 1.0"},
+      {:hackney, "~> 1.10"},
+      {:google_api_you_tube, "~> 0.0.1"}
     ]
   end
 

@@ -50,8 +50,13 @@ config :phoenix, :stacktrace_depth, 20
 # Configure your database
 config :video_buddy, VideoBuddy.Repo,
   adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
-  password: "postgres",
+  username: "tevans",
   database: "video_buddy_dev",
   hostname: "localhost",
   pool_size: 10
+
+config :video_buddy, VideoBuddyYoutube.Config,
+  channelId: "your_channel_id",
+  authToken: "your_auth_token"
+
+import_config "dev.secret.exs"

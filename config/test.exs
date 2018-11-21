@@ -15,3 +15,7 @@ config :video_buddy, VideoBuddy.Repo,
   database: "video_buddy_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
+
+config :video_buddy, VideoBuddyYoutube.Config,
+  channelId: "your_channel_id",
+  authToken: "your_auth_token"

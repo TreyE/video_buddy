@@ -9,7 +9,8 @@ defmodule VideoBuddy.RepositoryDependents do
     import Supervisor.Spec
     children = [
       # Start the endpoint when the application starts
-      supervisor(VideoBuddyWeb.Endpoint, [])
+      supervisor(VideoBuddyWeb.Endpoint, []),
+      worker(VideoBuddyYoutube.AuthTokenManager, [])
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
