@@ -6,7 +6,6 @@ defmodule VideoBuddyYoutube.TeslaClient do
   plug Tesla.Middleware.BaseUrl, "https://www.googleapis.com"
   plug Tesla.Middleware.Headers, %{ 'user-agent': "Elixir" }
 
-  # @spec start_upload_request(VideoBuddyYoutube.UploadRequest.t()) :: Tesla.Env.t()
   def start_upload_request(req) do
     t_request = VideoBuddyYoutube.UploadRequest.create_resumable_request(req)
     case exec_request(t_request) do

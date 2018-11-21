@@ -5,6 +5,18 @@ defmodule VideoBuddyYoutube.TeslaUploader do
 
   plug Tesla.Middleware.Headers, %{ 'user-agent': "Elixir" }
 
+  def check_upload_progress(upload_request, upload_uri) do
+    %{size: c_len} = File.stat!(upload_request.source_uri)
+    req = [
+      method: :put,
+      url: upload_uri,
+      headers: %{
+        "Content-Length": 0,
+        "Content-Type": "bytes */#{c_len}"
+      }
+    ]
+    exec_request(req)
+  end
   def start_async_video_upload(upload_request, upload_uri, listener_pid) do
     %{size: c_len} = File.stat!(upload_request.source_uri)
     read_file_stream = Stream.resource(fn -> {File.open!(upload_request.source_uri, [:read, :binary]), 0} end,

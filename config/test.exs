@@ -17,5 +17,8 @@ config :video_buddy, VideoBuddy.Repo,
   pool: Ecto.Adapters.SQL.Sandbox
 
 config :video_buddy, VideoBuddyYoutube.Config,
-  channelId: "your_channel_id",
-  authToken: "your_auth_token"
+  channelId: "test_channel_id",
+  authToken: "test_auth_token",
+  refreshToken: "test_refresh_token",
+  clientId: "test_client_id",
+  clientSecret: "test_client_secret"
