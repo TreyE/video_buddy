@@ -16,22 +16,19 @@ defmodule VideoBuddyYoutube.UploadProcess do
   end
 
   defp start_upload_process(upload_record) do
-    changeset = VideoBuddy.Models.YoutubeUploadAttempt.changeset(
-      upload_record,
-      %{
-        upload_status: "claimed_but_unstarted"
-      }
-    )
-    updated_record = Repo.update!(changeset)
+    updated_record = VideoBuddy.YoutubeUploadAttempt.claim_upload(upload_record)
     upload_request = build_upload_request(updated_record)
     upload_uri = get_upload_uri(upload_request)
-    record_with_upload_uri = set_upload_uri(updated_record, upload_uri)
+    record_with_upload_uri = VideoBuddy.YoutubeUploadAttempt.set_upload_uri(updated_record, upload_uri)
     ul = spawn(fn -> start_upload_listener(record_with_upload_uri) end)
     VideoBuddyYoutube.TeslaUploader.start_async_video_upload(upload_request, upload_uri, ul)
   end
 
-  defp resume_upload_process(_upload_record) do
-    IO.puts("Don't handle resuming right now")
+  defp resume_upload_process(upload_record) do
+    case upload_record.upload_status do
+      "claimed_but_unstarted" -> start_upload_process(upload_record)
+      _ -> IO.puts("We don't handle resuming right now")
+    end
   end
 
   defp build_upload_request(upload_record) do
@@ -48,16 +45,6 @@ defmodule VideoBuddyYoutube.UploadProcess do
   def get_upload_uri(upload_request) do
     {:ok, upload_uri} = VideoBuddyYoutube.TeslaClient.start_upload_request(upload_request)
     upload_uri
-  end
-
-  def set_upload_uri(upload_record, upload_uri) do
-    VideoBuddy.Models.YoutubeUploadAttempt.changeset(
-      upload_record,
-      %{
-        uploading_uri: upload_uri,
-        upload_status: "upload_uri_set"
-      }
-    ) |> Repo.update!()
   end
 
   defp convert_tags(nil) do
@@ -89,20 +76,10 @@ defmodule VideoBuddyYoutube.UploadProcess do
     end
   end
 
-  def mark_upload_started(upload_record, progress) do
-    VideoBuddy.Models.YoutubeUploadAttempt.changeset(
-      upload_record,
-      %{
-        upload_status: "uploading",
-        upload_progress: progress
-      }
-    ) |> Repo.update!()
-  end
-
   defp start_upload_listener(upload_record) do
      receive do
         {:start, progress_so_far, total_size} ->
-          updated_record = mark_upload_started(upload_record, progress_so_far)
+          updated_record = VideoBuddy.YoutubeUploadAttempt.mark_started(upload_record, progress_so_far)
           new_percent = (progress_so_far/total_size) * 100.0
           handle_upload_progress(updated_record, new_percent)
      after
@@ -129,29 +106,9 @@ defmodule VideoBuddyYoutube.UploadProcess do
 
   def handle_upload_stopped(upload_record, read_so_far, expected_len)  do
     case (read_so_far < expected_len) do
-      false -> mark_upload_complete(upload_record, read_so_far)
-      _ -> mark_upload_interrupted(upload_record, read_so_far)
+      false -> VideoBuddy.YoutubeUploadAttempt.mark_complete(upload_record, read_so_far)
+      _ -> VideoBuddy.YoutubeUploadAttempt.mark_interrupted(upload_record, read_so_far)
     end
     IO.puts("Finished uploading a total of #{read_so_far} from #{expected_len}")
-  end
-
-  def mark_upload_complete(upload_record, progress) do
-    VideoBuddy.Models.YoutubeUploadAttempt.changeset(
-      upload_record,
-      %{
-        upload_status: "upload_complete",
-        upload_progress: progress
-      }
-    ) |> Repo.update!()
-  end
-
-  def mark_upload_interrupted(upload_record, progress) do
-    VideoBuddy.Models.YoutubeUploadAttempt.changeset(
-      upload_record,
-      %{
-        upload_status: "interrupted",
-        upload_progress: progress
-      }
-    ) |> Repo.update!()
   end
 end
