@@ -113,7 +113,6 @@ defmodule VideoBuddyYoutube.UploadProcess do
       false -> VideoBuddy.YoutubeUploadAttempt.mark_complete(upload_record, read_so_far)
       _ -> VideoBuddy.YoutubeUploadAttempt.mark_interrupted(upload_record, read_so_far)
     end
-    IO.puts("Finished uploading a total of #{read_so_far} from #{expected_len}")
   end
 
   defp handle_upload_request_end(response, listener_pid, upload_record_id) do
