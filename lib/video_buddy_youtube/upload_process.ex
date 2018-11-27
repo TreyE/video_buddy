@@ -1,5 +1,4 @@
 defmodule VideoBuddyYoutube.UploadProcess do
-  alias VideoBuddy.Repo
 
   def init_worker_from_beginning(upload_record) do
     receive do

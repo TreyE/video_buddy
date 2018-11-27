@@ -1,6 +1,8 @@
 defmodule VideoBuddyYoutube.TeslaUploader do
   use Tesla
 
+  @upload_block_size 262144
+
   adapter :hackney
 
   plug Tesla.Middleware.Headers, %{ 'user-agent': "Elixir" }
@@ -22,7 +24,7 @@ defmodule VideoBuddyYoutube.TeslaUploader do
     %{size: c_len} = File.stat!(upload_request.source_uri)
     read_file_stream = Stream.resource(fn -> {File.open!(upload_request.source_uri, [:read, :binary]), 0} end,
                 fn({file, read_so_far}) ->
-                  case IO.binread(file, 4096) do
+                  case IO.binread(file, @upload_block_size) do
                     data when is_binary(data) ->
                       data_size = byte_size(data)
                       total_read = read_so_far + data_size
