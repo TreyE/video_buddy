@@ -90,7 +90,7 @@ defmodule VideoBuddyYoutube.UploadProcess do
     receive do
       {:data_read, _data_size, total_read, _total_len} ->
         new_time = Time.utc_now()
-        time_difference = Time.diff(new_time, last_update_time, :microsecond)
+        time_difference = Time.diff(new_time, last_update_time, :millisecond)
         case (time_difference >= @db_record_update_interval_ms) do
           false -> handle_upload_progress(upload_record, last_update_time)
           _ ->

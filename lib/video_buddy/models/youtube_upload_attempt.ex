@@ -15,6 +15,8 @@ defmodule VideoBuddy.Models.YoutubeUploadAttempt do
     field :publish_at, :utc_datetime
     field :tags, :string
     field :visibility, :string, default: "private"
+
+    timestamps()
   end
 
   def new(params \\ %{}) do
