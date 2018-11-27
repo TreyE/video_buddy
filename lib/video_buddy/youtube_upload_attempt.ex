@@ -2,6 +2,10 @@ defmodule VideoBuddy.YoutubeUploadAttempt do
   alias VideoBuddy.Repo
   import Ecto.Query
 
+  def new(params \\ %{}) do
+    changeset(%VideoBuddy.Models.YoutubeUploadAttempt{}, params)
+  end
+
   def get(upload_id) do
     Repo.get(VideoBuddy.Models.YoutubeUploadAttempt, upload_id)
   end

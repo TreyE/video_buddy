@@ -9,7 +9,7 @@ defmodule VideoBuddyYoutube.Models.YoutubeUploadAttemptTest do
     error_list = Ecto.Changeset.traverse_errors(changeset,
       fn({msg, _}) -> msg end
     )
-    ["can't be blank"] = Map.fetch!(error_list, :published_at)
+    ["can't be blank"] = Map.fetch!(error_list, :publish_at)
   end
 
   test "requires a title" do
@@ -38,6 +38,6 @@ defmodule VideoBuddyYoutube.Models.YoutubeUploadAttemptTest do
       %{}
     )
     yua = Ecto.Changeset.apply_changes(changeset)
-    "not_yet_attempted" = yua.upload_status
+    "unlocked" = yua.upload_status
   end
 end

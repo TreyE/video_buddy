@@ -78,9 +78,8 @@ defmodule VideoBuddyYoutube.UploadProcess do
 
   defp start_upload_listener(upload_record) do
      receive do
-        {:start, progress_so_far, total_size} ->
+        {:start, progress_so_far, _total_size} ->
           updated_record = VideoBuddy.YoutubeUploadAttempt.mark_uploading(upload_record, progress_so_far)
-          new_percent = (progress_so_far/total_size) * 100.0
           handle_upload_progress(updated_record, Time.utc_now)
      after
         20000 -> :ok

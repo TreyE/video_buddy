@@ -54,19 +54,19 @@ defmodule VideoBuddy.Models.YoutubeUploadAttempt do
 
   defp validate_publish_at_if_scheduled(changeset) do
     case fetch_field(changeset, :visibility) do
-      {:changes, "scheduled"} -> validate_published_at(changeset)
-      {:data, "scheduled"} -> validate_published_at(changeset)
+      {:changes, "scheduled"} -> validate_publish_at(changeset)
+      {:data, "scheduled"} -> validate_publish_at(changeset)
       _ -> changeset
     end
   end
 
-  defp validate_published_at(changeset) do
-    case fetch_field(changeset, :published_at) do
-      {:changes, nil} -> add_error(changeset, :published_at, "can't be blank")
-      {:data, nil} -> add_error(changeset, :published_at, "can't be blank")
+  defp validate_publish_at(changeset) do
+    case fetch_field(changeset, :publish_at) do
+      {:changes, nil} -> add_error(changeset, :publish_at, "can't be blank")
+      {:data, nil} -> add_error(changeset, :publish_at, "can't be blank")
       {:changes, _} -> changeset
       {:data, _} -> changeset
-      _ -> add_error(changeset, :published_at, "can't be blank")
+      _ -> add_error(changeset, :publish_at, "can't be blank")
     end
   end
 end
