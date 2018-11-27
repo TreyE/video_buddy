@@ -55,8 +55,4 @@ config :video_buddy, VideoBuddy.Repo,
   hostname: "localhost",
   pool_size: 10
 
-config :video_buddy, VideoBuddyYoutube.Config,
-  channelId: "your_channel_id",
-  authToken: "your_auth_token"
-
 import_config "dev.secret.exs"
