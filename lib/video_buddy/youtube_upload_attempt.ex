@@ -46,7 +46,7 @@ defmodule VideoBuddy.YoutubeUploadAttempt do
     mark_state_progress(upload_record, "upload_complete", progress)
   end
 
-  def mark_started(upload_record, progress) do
+  def mark_uploading(upload_record, progress) do
     mark_state_progress(upload_record, "uploading", progress)
   end
 

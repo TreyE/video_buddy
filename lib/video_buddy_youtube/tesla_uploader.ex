@@ -1,7 +1,7 @@
 defmodule VideoBuddyYoutube.TeslaUploader do
   use Tesla
 
-  @upload_block_size 262144
+  @upload_block_size 4096
 
   adapter :hackney
 

@@ -1,4 +1,5 @@
 defmodule VideoBuddyYoutube.UploadProcess do
+  @db_record_update_interval_ms 2000
 
   def init_worker_from_beginning(upload_record) do
     receive do
@@ -78,23 +79,24 @@ defmodule VideoBuddyYoutube.UploadProcess do
   defp start_upload_listener(upload_record) do
      receive do
         {:start, progress_so_far, total_size} ->
-          updated_record = VideoBuddy.YoutubeUploadAttempt.mark_started(upload_record, progress_so_far)
+          updated_record = VideoBuddy.YoutubeUploadAttempt.mark_uploading(upload_record, progress_so_far)
           new_percent = (progress_so_far/total_size) * 100.0
-          handle_upload_progress(updated_record, new_percent)
+          handle_upload_progress(updated_record, Time.utc_now)
      after
         20000 -> :ok
      end
   end
 
-  defp handle_upload_progress(upload_record, last_percent) do
+  defp handle_upload_progress(upload_record, last_update_time) do
     receive do
-      {:data_read, _data_size, total_read, total_len} ->
-        new_percent = (total_read / total_len) * 100.0
-        case (new_percent - last_percent) > 1.0 do
-          false -> handle_upload_progress(upload_record, last_percent)
+      {:data_read, _data_size, total_read, _total_len} ->
+        new_time = Time.utc_now()
+        time_difference = Time.diff(new_time, last_update_time, :microsecond)
+        case (time_difference >= @db_record_update_interval_ms) do
+          false -> handle_upload_progress(upload_record, last_update_time)
           _ ->
-            IO.puts("#{new_percent}")
-            handle_upload_progress(upload_record, new_percent)
+            updated_record = VideoBuddy.YoutubeUploadAttempt.mark_uploading(upload_record, total_read)
+            handle_upload_progress(updated_record, new_time)
         end
       {:done, read_so_far, expected_len} ->
         handle_upload_stopped(upload_record, read_so_far, expected_len)
