@@ -17,6 +17,7 @@ defmodule VideoBuddyYoutube.TeslaUploader do
     ]
     exec_request(req)
   end
+
   def start_async_video_upload(upload_request, upload_uri, listener_pid) do
     %{size: c_len} = File.stat!(upload_request.source_uri)
     read_file_stream = Stream.resource(fn -> {File.open!(upload_request.source_uri, [:read, :binary]), 0} end,
@@ -42,6 +43,7 @@ defmodule VideoBuddyYoutube.TeslaUploader do
       },
       body: read_file_stream
     ]
+    send(listener_pid, {:start, 0, c_len})
     exec_request(req)
   end
 

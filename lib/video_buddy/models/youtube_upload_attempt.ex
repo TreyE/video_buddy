@@ -17,6 +17,10 @@ defmodule VideoBuddy.Models.YoutubeUploadAttempt do
     field :visibility, :string, default: "private"
   end
 
+  def new(params \\ %{}) do
+    changeset(%__MODULE__{}, params)
+  end
+
   def changeset(yua, params \\ %{}) do
     yua
       |> cast(params, [
@@ -43,12 +47,12 @@ defmodule VideoBuddy.Models.YoutubeUploadAttempt do
          )
       |> validate_inclusion(
           :upload_status,
-          ["not_yet_attempted", "claimed_but_unstarted", "upload_uri_set", "uploading", "upload_complete"]
+          ["not_yet_attempted", "claimed_but_unstarted", "upload_uri_set", "uploading", "interrupted", "upload_complete"]
        )
       |> validate_publish_at_if_scheduled
   end
 
-  def validate_publish_at_if_scheduled(changeset) do
+  defp validate_publish_at_if_scheduled(changeset) do
     case fetch_field(changeset, :visibility) do
       {:changes, "scheduled"} -> validate_published_at(changeset)
       {:data, "scheduled"} -> validate_published_at(changeset)
@@ -56,7 +60,7 @@ defmodule VideoBuddy.Models.YoutubeUploadAttempt do
     end
   end
 
-  def validate_published_at(changeset) do
+  defp validate_published_at(changeset) do
     case fetch_field(changeset, :published_at) do
       {:changes, nil} -> add_error(changeset, :published_at, "can't be blank")
       {:data, nil} -> add_error(changeset, :published_at, "can't be blank")

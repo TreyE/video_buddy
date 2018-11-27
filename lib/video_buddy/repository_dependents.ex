@@ -10,7 +10,8 @@ defmodule VideoBuddy.RepositoryDependents do
     children = [
       # Start the endpoint when the application starts
       supervisor(VideoBuddyWeb.Endpoint, []),
-      worker(VideoBuddyYoutube.AuthTokenManager, [])
+      worker(VideoBuddyYoutube.AuthTokenManager, []),
+      worker(VideoBuddyYoutube.UploadWorkerManager, [])
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
