@@ -8,14 +8,14 @@ defmodule VideoBuddy.YoutubeUploadAttempt do
 
   def inprogress_upload_ids() do
     (from yua in VideoBuddy.Models.YoutubeUploadAttempt,
-      where: yua.status in ["claimed_but_unstarted", "upload_uri_set", "uploading", "interrupted"],
+      where: yua.upload_status in ["claimed_but_unstarted", "upload_uri_set", "uploading", "interrupted"],
       select: yua.id)
       |> Repo.all
   end
 
   def unstarted_upload_ids() do
     (from yua in VideoBuddy.Models.YoutubeUploadAttempt,
-    where: yua.status == "claimed_but_unstarted",
+    where: yua.upload_status == "not_yet_attempted",
     select: yua.id)
     |> Repo.all
   end
