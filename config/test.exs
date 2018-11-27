@@ -18,7 +18,6 @@ config :video_buddy, VideoBuddy.Repo,
 
 config :video_buddy, VideoBuddyYoutube.Config,
   channelId: "test_channel_id",
-  authToken: "test_auth_token",
   refreshToken: "test_refresh_token",
   clientId: "test_client_id",
   clientSecret: "test_client_secret"

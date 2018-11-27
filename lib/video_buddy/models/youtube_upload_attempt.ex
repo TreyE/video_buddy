@@ -9,7 +9,9 @@ defmodule VideoBuddy.Models.YoutubeUploadAttempt do
     field :recording_date, :utc_datetime
     field :upload_status, :string, default: "not_yet_attempted"
     field :upload_progress, :integer, default: 0
+    field :file_size, :integer
     field :uploading_uri, :string
+    field :youtube_video_id, :string
     field :publish_at, :utc_datetime
     field :tags, :string
     field :visibility, :string, default: "private"
@@ -26,6 +28,8 @@ defmodule VideoBuddy.Models.YoutubeUploadAttempt do
            :tags,
            :uploading_uri,
            :upload_progress,
+           :file_size,
+           :youtube_video_id,
            :publish_at,
            :visibility
         ])
@@ -39,7 +43,7 @@ defmodule VideoBuddy.Models.YoutubeUploadAttempt do
          )
       |> validate_inclusion(
           :upload_status,
-          ["not_yet_attempted", "upload_uri_set", "uploading", "upload_complete"]
+          ["not_yet_attempted", "claimed_but_unstarted", "upload_uri_set", "uploading", "upload_complete"]
        )
       |> validate_publish_at_if_scheduled
   end

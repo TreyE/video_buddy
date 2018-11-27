@@ -18,9 +18,4 @@ defmodule VideoBuddyYoutube.Config do
     Application.get_env(:video_buddy, VideoBuddyYoutube.Config, %{})
       |> Keyword.fetch!(:channelId)
   end
-
-  def auth_token do
-    Application.get_env(:video_buddy, VideoBuddyYoutube.Config, %{})
-      |> Keyword.fetch!(:authToken)
-  end
 end
