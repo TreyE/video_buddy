@@ -11,7 +11,8 @@ defmodule VideoBuddy.RepositoryDependents do
       # Start the endpoint when the application starts
       supervisor(VideoBuddyWeb.Endpoint, []),
       worker(VideoBuddyYoutube.AuthTokenManager, []),
-      worker(VideoBuddyYoutube.UploadWorkerManager, [])
+      worker(VideoBuddyYoutube.UploadWorkerManager, []),
+      worker(VideoBuddyYoutube.UploadScheduler, [])
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

@@ -1,4 +1,20 @@
 defmodule VideoBuddyYoutube.UploadScheduler do
+  use Task
+
+  def start_link() do
+    Task.start_link(&wait_then_run/0)
+  end
+
+  def wait_then_run() do
+    receive do
+      _ -> :ok
+    after
+      10000 ->
+        schedule_youtube_uploads()
+        wait_then_run()
+    end
+  end
+
   def schedule_youtube_uploads() do
     Enum.each(unstarted_uploads(), fn(upload_id) ->
       start_new_upload(upload_id)

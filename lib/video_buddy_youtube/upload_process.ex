@@ -21,7 +21,11 @@ defmodule VideoBuddyYoutube.UploadProcess do
     upload_uri = get_upload_uri(upload_request)
     record_with_upload_uri = VideoBuddy.YoutubeUploadAttempt.set_upload_uri(updated_record, upload_uri)
     ul = spawn(fn -> start_upload_listener(record_with_upload_uri) end)
-    VideoBuddyYoutube.TeslaUploader.start_async_video_upload(upload_request, upload_uri, ul)
+    handle_upload_request_end(
+      VideoBuddyYoutube.TeslaUploader.start_async_video_upload(upload_request, upload_uri, ul),
+      ul,
+      record_with_upload_uri.id
+    )
   end
 
   defp resume_upload_process(upload_record) do
@@ -111,4 +115,25 @@ defmodule VideoBuddyYoutube.UploadProcess do
     end
     IO.puts("Finished uploading a total of #{read_so_far} from #{expected_len}")
   end
+
+  defp handle_upload_request_end(response, listener_pid, upload_record_id) do
+     case Process.alive?(listener_pid) do
+        false -> process_upload_end_with_response(response, upload_record_id)
+        _ ->
+          :timer.sleep(2000)
+          handle_upload_request_end(response, listener_pid, upload_record_id)
+     end
+  end
+
+  @spec process_upload_end_with_response(Tesla.Env.t(), integer()) :: any()
+  defp process_upload_end_with_response(%{status: 200} = response, upload_record_id) do
+     upload_record = VideoBuddy.YoutubeUploadAttempt.get(upload_record_id)
+     video = Poison.decode!(Map.fetch!(response, :body), as: %GoogleApi.YouTube.V3.Model.Video{})
+     VideoBuddy.YoutubeUploadAttempt.complete_upload_and_set_youtube_id(upload_record, video.id)
+  end
+
+  defp process_upload_end_with_response(response, upload_record_id) do
+    upload_record = VideoBuddy.YoutubeUploadAttempt.get(upload_record_id)
+    IO.inspect(response)
+ end
 end

@@ -24,6 +24,17 @@ defmodule VideoBuddy.YoutubeUploadAttempt do
     |> Repo.all
   end
 
+  def complete_upload_and_set_youtube_id(upload_record, youtube_id) do
+    VideoBuddy.Models.YoutubeUploadAttempt.changeset(
+      upload_record,
+      %{
+        upload_status: "upload_complete",
+        upload_progress: upload_record.file_size,
+        youtube_video_id: youtube_id
+      }
+    ) |> Repo.update!()
+  end
+
   def set_upload_uri(upload_record, upload_uri) do
     changeset(
       upload_record,
