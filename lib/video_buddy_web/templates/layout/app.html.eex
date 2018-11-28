@@ -8,7 +8,12 @@
     <meta name="author" content="">
 
     <title>Hello VideoBuddy!</title>
-    <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
+<%= if Mix.env == :dev do %>
+    <link rel="stylesheet" href="http://localhost:8080/app.css">
+<% else %>
+    <link rel="stylesheet" href="<%= static_path(@conn, "/static/assets/app.css") %>">
+<% end %>
+
   </head>
 
   <body>
@@ -33,7 +38,7 @@
 <%= if Mix.env == :dev do %>
     <script src='http://localhost:8080/app.js'></script>
 <% else %>
-    <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
+    <script src="<%= static_path(@conn, "/static/assets/app.js") %>"></script>
 <% end %>
   </body>
 </html>

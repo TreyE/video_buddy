@@ -2,4 +2,8 @@
 // copy the following scripts into your javascript bundle:
 // * https://raw.githubusercontent.com/phoenixframework/phoenix_html/v2.10.0/priv/static/phoenix_html.js
 
-require("./phoenix");
+require("js/phoenix");
+
+import 'bootstrap';
+
+import 'app.css';
