@@ -72,6 +72,7 @@ defmodule  VideoBuddyYoutube.AuthTokenManager do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
+  @spec get_auth_token() :: {:ok, term()} | {:error, term()}
   def get_auth_token() do
     GenServer.call(__MODULE__, :get_auth_token)
   end
@@ -80,12 +81,18 @@ defmodule  VideoBuddyYoutube.AuthTokenManager do
     case State.token_expired(state) do
       false -> {:reply, VideoBuddyYoutube.AuthTokenManager.State.token(state), state}
       _ ->
-        new_state = get_token_using_state(state)
-        {:reply, VideoBuddyYoutube.AuthTokenManager.State.token(new_state), new_state}
+        case get_token_using_state(state) do
+          {:ok, new_state} -> {:reply, {:ok, VideoBuddyYoutube.AuthTokenManager.State.token(new_state)}, new_state}
+          {:error, e} -> {:reply, {:error, e}, state}
+        end
     end
   end
 
   defp get_token_using_state(state) do
-    Requestor.request_new_token(state)
+    try do
+      {:ok, Requestor.request_new_token(state)}
+    rescue
+      e -> {:error, e}
+    end
   end
 end
