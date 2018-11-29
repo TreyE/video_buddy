@@ -15,7 +15,7 @@ defmodule VideoBuddyYoutube.TeslaClient do
   end
 
   defp add_auth_information(req) do
-    token = VideoBuddyYoutube.AuthTokenManager.get_auth_token()
+    {:ok, token} = VideoBuddyYoutube.AuthTokenManager.get_auth_token()
     auth_header_val = "Bearer " <> token
     Keyword.update(req, :headers, %{authorization: auth_header_val},
       fn(headers) ->

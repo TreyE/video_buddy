@@ -79,7 +79,7 @@ defmodule  VideoBuddyYoutube.AuthTokenManager do
 
   def handle_call(:get_auth_token, _from, state) do
     case State.token_expired(state) do
-      false -> {:reply, VideoBuddyYoutube.AuthTokenManager.State.token(state), state}
+      false -> {:reply, {:ok, VideoBuddyYoutube.AuthTokenManager.State.token(state)}, state}
       _ ->
         case get_token_using_state(state) do
           {:ok, new_state} -> {:reply, {:ok, VideoBuddyYoutube.AuthTokenManager.State.token(new_state)}, new_state}
