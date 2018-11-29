@@ -63,6 +63,8 @@ defmodule  VideoBuddyYoutube.AuthTokenManager do
     end
   end
 
+  @type call_reply(msg) :: {:reply, msg, VideoBuddyYoutube.AuthTokenManager.State.t()}
+
   def init([]) do
     {:ok, VideoBuddyYoutube.AuthTokenManager.State.new()}
   end
@@ -77,6 +79,7 @@ defmodule  VideoBuddyYoutube.AuthTokenManager do
     GenServer.call(__MODULE__, :get_auth_token)
   end
 
+  @spec handle_call(:get_auth_token,  any(), VideoBuddyYoutube.AuthTokenManager.State.t()) :: call_reply({:ok, term()} | {:error, term()})
   def handle_call(:get_auth_token, _from, state) do
     case State.token_expired(state) do
       false -> {:reply, {:ok, VideoBuddyYoutube.AuthTokenManager.State.token(state)}, state}
