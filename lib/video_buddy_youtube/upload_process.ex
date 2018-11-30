@@ -31,7 +31,9 @@ defmodule VideoBuddyYoutube.UploadProcess do
   defp resume_upload_process(upload_record) do
     case upload_record.upload_status do
       "claimed_but_unstarted" -> start_upload_process(upload_record)
-      _ -> IO.puts("We don't handle resuming right now")
+      _ ->
+        VideoBuddy.YoutubeUploadAttempt.mark_interrupted(upload_record)
+        IO.puts("We don't handle resuming right now")
     end
   end
 
@@ -99,6 +101,7 @@ defmodule VideoBuddyYoutube.UploadProcess do
           false -> handle_upload_progress(upload_record, last_update_time)
           _ ->
             updated_record = VideoBuddy.YoutubeUploadAttempt.mark_uploading(upload_record, total_read)
+            VideoBuddyWeb.YoutubeUploadAttemptChannel.broadcast_upload_update(updated_record.id, "uploading", total_read, updated_record.file_size)
             handle_upload_progress(updated_record, new_time)
         end
       {:done, read_so_far, expected_len} ->

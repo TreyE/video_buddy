@@ -53,6 +53,15 @@ defmodule VideoBuddy.YoutubeUploadAttempt do
     ) |> Repo.update!()
   end
 
+  def mark_interrupted(upload_record) do
+    changeset(
+      upload_record,
+      %{
+        upload_status: "interrupted"
+      }
+    ) |> Repo.update!()
+  end
+
   def mark_interrupted(upload_record, progress) do
     mark_state_progress(upload_record, "interrupted", progress)
   end

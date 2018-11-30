@@ -19,6 +19,8 @@ defmodule VideoBuddyWeb.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
+  channel("youtube_upload_attempt:*", VideoBuddyWeb.YoutubeUploadAttemptChannel)
+
   def connect(_params, socket) do
     {:ok, socket}
   end

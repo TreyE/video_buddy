@@ -2,7 +2,7 @@
 // copy the following scripts into your javascript bundle:
 // * https://raw.githubusercontent.com/phoenixframework/phoenix_html/v2.10.0/priv/static/phoenix_html.js
 
-require("js/phoenix");
+require("js/youtube_upload_progress_socket");
 
 import 'bootstrap';
 
