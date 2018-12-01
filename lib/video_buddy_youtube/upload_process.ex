@@ -113,7 +113,9 @@ defmodule VideoBuddyYoutube.UploadProcess do
 
   def handle_upload_stopped(upload_record, read_so_far, expected_len)  do
     case (read_so_far < expected_len) do
-      false -> VideoBuddy.YoutubeUploadAttempt.mark_complete(upload_record, read_so_far)
+      false ->
+        VideoBuddyWeb.YoutubeUploadAttemptChannel.broadcast_upload_update(upload_record.id, "upload_complete", read_so_far, upload_record.file_size)
+        VideoBuddy.YoutubeUploadAttempt.mark_complete(upload_record, read_so_far)
       _ -> VideoBuddy.YoutubeUploadAttempt.mark_interrupted(upload_record, read_so_far)
     end
   end
