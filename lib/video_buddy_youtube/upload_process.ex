@@ -33,7 +33,7 @@ defmodule VideoBuddyYoutube.UploadProcess do
       "claimed_but_unstarted" -> start_upload_process(upload_record)
       _ ->
         VideoBuddy.YoutubeUploadAttempt.mark_interrupted(upload_record)
-        IO.puts("We don't handle resuming right now")
+        resume_interrupted_process(upload_record)
     end
   end
 
@@ -46,6 +46,42 @@ defmodule VideoBuddyYoutube.UploadProcess do
       convert_tags(upload_record.tags),
       upload_record.source_file_location
     )
+  end
+
+  defp resume_interrupted_process(upload_record) do
+    upload_request = build_upload_request(upload_record)
+    upload_status_response = VideoBuddyYoutube.TeslaUploader.check_upload_progress(upload_request, upload_record.uploading_uri)
+    case upload_status_response do
+      %{status: 308} = resp -> get_range_and_resume(upload_record, upload_request, resp)
+      _ -> IO.puts("UPLOAD FAILED")
+    end
+  end
+
+  defp get_range_and_resume(upload_record, upload_request, progress_response) do
+    case Map.has_key?(progress_response.headers, "range") do
+      false ->
+        updated_record = VideoBuddy.YoutubeUploadAttempt.mark_uploading(upload_record, 0)
+        ul = spawn(fn -> start_upload_listener(updated_record) end)
+        handle_upload_request_end(
+          VideoBuddyYoutube.TeslaUploader.start_async_video_upload(upload_request, updated_record.uploading_uri, ul),
+          ul,
+          updated_record.id
+        )
+      _ -> get_range_values_and_resume(upload_record, upload_request, Map.fetch!(progress_response.headers, "range"))
+    end
+  end
+
+  defp get_range_values_and_resume(upload_record, upload_request, range_header_value) do
+     {last_sent, _rest} = (String.trim(range_header_value)
+                   |> String.split("-")
+                   |> List.last()
+                   |> Integer.parse())
+      ul = spawn(fn -> start_upload_listener(upload_record) end)
+      handle_upload_request_end(
+        VideoBuddyYoutube.TeslaUploader.resume_async_video_upload(upload_request, upload_record.uploading_uri, ul, last_sent),
+        ul,
+        upload_record.id
+      )
   end
 
   def get_upload_uri(upload_request) do

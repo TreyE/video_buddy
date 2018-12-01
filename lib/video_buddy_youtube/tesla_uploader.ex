@@ -49,6 +49,50 @@ defmodule VideoBuddyYoutube.TeslaUploader do
     exec_request(req)
   end
 
+  @spec resume_async_video_upload(
+          %VideoBuddyYoutube.UploadRequest{},
+          String.t(),
+          pid(),
+          integer()
+        ) :: Tesla.Env.t()
+  def resume_async_video_upload(upload_request, upload_uri, listener_pid, last_byte_of_previous) do
+    %{size: c_len} = File.stat!(upload_request.source_uri)
+    last_byte_to_send = c_len - 1
+    first_byte_to_send = last_byte_of_previous + 1
+    read_previously = last_byte_of_previous + 1
+    remaining_bytes = c_len - read_previously
+    read_file_stream = Stream.resource(fn ->
+                  f = File.open!(upload_request.source_uri, [:read, :binary])
+                  {:ok, ^first_byte_to_send} = :file.position(f,{:bof, first_byte_to_send})
+                  {f, read_previously}
+                end,
+                fn({file, read_so_far}) ->
+                  case IO.binread(file, @upload_block_size) do
+                    data when is_binary(data) ->
+                      data_size = byte_size(data)
+                      total_read = read_so_far + data_size
+                      send(listener_pid, {:data_read, data_size, total_read, c_len})
+                      {[data], {file, total_read}}
+                    _ ->
+                      send(listener_pid, {:done, read_so_far, c_len})
+                      {:halt, {file, read_so_far}}
+                  end
+                end,
+                fn({file, _}) -> File.close(file) end)
+    req = [
+      method: :put,
+      url: upload_uri,
+      headers: %{
+        "Content-Length": remaining_bytes,
+        "Content-Type": "video/*",
+        "Content-Range": "#{first_byte_to_send}-#{last_byte_to_send}/#{c_len}"
+      },
+      body: read_file_stream
+    ]
+    send(listener_pid, {:start, read_previously, c_len})
+    exec_request(req)
+  end
+
   def simple_upload_listener(last_percent) do
     receive do
       {:data_read, _data_size, total_read, total_len} ->
