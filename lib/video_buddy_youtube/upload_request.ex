@@ -19,7 +19,7 @@ defmodule VideoBuddyYoutube.UploadRequest do
 
   @gaming_category_id 20
 
-  @upload_path "/upload/youtube/v3/videos"
+  @upload_path "/resumable/upload/youtube/v3/videos"
 
   @spec new(String.t(), String.t(), DateTime.t(), :public | :private | {:scheduled, DateTime.t()}, [String.t()], String.t()) ::
     __MODULE__.t()
@@ -46,8 +46,8 @@ defmodule VideoBuddyYoutube.UploadRequest do
       ],
       headers: %{
         "Content-Type": "application/json; charset=utf-8",
-        "X-Upload-Content-Length": c_len,
-        "X-Upload-Content-Type": "video/*"
+        "x-upload-content-length": c_len,
+        "X-Upload-Content-Type": "application/octet-stream"
       },
       body: Poison.encode!(resource)
     ]

@@ -1,11 +1,11 @@
 defmodule VideoBuddyYoutube.TeslaUploader do
   use Tesla
 
-  @upload_block_size 4096
+  @upload_block_size 262144
 
   adapter :hackney
 
-  plug Tesla.Middleware.Headers, %{ 'user-agent': "Elixir" }
+  plug Tesla.Middleware.Headers
 
   def check_upload_progress(upload_request, upload_uri) do
     %{size: c_len} = File.stat!(upload_request.source_uri)
@@ -13,9 +13,10 @@ defmodule VideoBuddyYoutube.TeslaUploader do
       method: :put,
       url: upload_uri,
       headers: %{
-        "Content-Length": 0,
-        "Content-Type": "bytes */#{c_len}"
-      }
+        "Content-Length": "0",
+        "Content-Range": "bytes */#{c_len}"
+      },
+      body: ""
     ]
     exec_request(req)
   end
@@ -89,6 +90,7 @@ defmodule VideoBuddyYoutube.TeslaUploader do
       },
       body: read_file_stream
     ]
+    IO.inspect(req)
     send(listener_pid, {:start, read_previously, c_len})
     exec_request(req)
   end

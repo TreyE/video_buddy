@@ -18,8 +18,8 @@ defmodule VideoBuddyYoutube.UploadProcess do
   defp start_upload_process(upload_record) do
     updated_record = VideoBuddy.YoutubeUploadAttempt.claim_upload(upload_record)
     upload_request = build_upload_request(updated_record)
-    upload_uri = get_upload_uri(upload_request)
-    record_with_upload_uri = VideoBuddy.YoutubeUploadAttempt.set_upload_uri(updated_record, upload_uri)
+    {:ok, upload_uri, video_id} = VideoBuddyYoutube.TeslaClient.start_upload_request(upload_request)
+    record_with_upload_uri = VideoBuddy.YoutubeUploadAttempt.set_upload_uri(updated_record, upload_uri, video_id)
     ul = spawn(fn -> start_upload_listener(record_with_upload_uri) end)
     handle_upload_request_end(
       VideoBuddyYoutube.TeslaUploader.start_async_video_upload(upload_request, upload_uri, ul),
@@ -51,9 +51,11 @@ defmodule VideoBuddyYoutube.UploadProcess do
   defp resume_interrupted_process(upload_record) do
     upload_request = build_upload_request(upload_record)
     upload_status_response = VideoBuddyYoutube.TeslaUploader.check_upload_progress(upload_request, upload_record.uploading_uri)
+    IO.inspect(upload_status_response)
     case upload_status_response do
       %{status: 308} = resp -> get_range_and_resume(upload_record, upload_request, resp)
-      _ -> IO.puts("UPLOAD FAILED")
+      _ ->
+        IO.puts("UPLOAD FAILED")
     end
   end
 
@@ -82,11 +84,6 @@ defmodule VideoBuddyYoutube.UploadProcess do
         ul,
         upload_record.id
       )
-  end
-
-  def get_upload_uri(upload_request) do
-    {:ok, upload_uri} = VideoBuddyYoutube.TeslaClient.start_upload_request(upload_request)
-    upload_uri
   end
 
   defp convert_tags(nil) do

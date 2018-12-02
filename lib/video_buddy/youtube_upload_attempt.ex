@@ -35,12 +35,13 @@ defmodule VideoBuddy.YoutubeUploadAttempt do
     ) |> Repo.update!()
   end
 
-  def set_upload_uri(upload_record, upload_uri) do
+  def set_upload_uri(upload_record, upload_uri, youtube_id) do
     changeset(
       upload_record,
       %{
         uploading_uri: upload_uri,
-        upload_status: "upload_uri_set"
+        upload_status: "upload_uri_set",
+        youtube_video_id: youtube_id
       }
     ) |> Repo.update!()
   end
